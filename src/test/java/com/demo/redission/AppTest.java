@@ -1,6 +1,7 @@
 package com.demo.redission;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import junit.framework.Assert;
@@ -82,5 +83,18 @@ public class AppTest
             //0,0
             log.info("offset:{},length:{}", bytes.readerIndex(), array.length);
         }
+    }
+
+    public void testWriteDirectByteBuf() {
+        //申请长度是10的buffer
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer(10);
+        //写入5个长度的字节数组
+        byte[] bytes = new byte[]{1, 2, 3, 4, 5};
+        byteBuf.writeBytes(bytes);
+        System.out.println(byteBuf);
+        var writerIndex = byteBuf.writerIndex();
+        Assert.assertEquals(5, writerIndex);
+        Assert.assertEquals(0, byteBuf.readerIndex());
+
     }
 }
