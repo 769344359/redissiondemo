@@ -1,5 +1,8 @@
 package com.demo.redission;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -8,16 +11,19 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Unit test for simple App.
  */
+
 public class AppTest 
     extends TestCase
 {
-    /**
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AppTest.class);    /**
      * Create the test case
      *
      * @param testName name of the test case
@@ -51,5 +57,30 @@ public class AppTest
         redisson.getBucket("bucket", StringCodec.INSTANCE).set("aaa", 100 , TimeUnit.SECONDS );
         var res =  redisson.getBucket("bucket", StringCodec.INSTANCE).get() ;
         Assert.assertEquals("aaa" , res);
+    }
+
+    // https://blog.csdn.net/usagoole/article/details/88024517
+
+
+    public void testHeapByteBuf() {
+        ByteBuf heapBuf = Unpooled.buffer(10);
+        if (heapBuf.hasArray()) {
+            byte[] array = heapBuf.array();
+            int offset = heapBuf.arrayOffset() + heapBuf.readerIndex();
+            int length = heapBuf.readableBytes();
+            //0,0
+            log.info("offset:{},length:{}", offset, length);
+        }
+    }
+
+    public void testDirectByteBuf() {
+        ByteBuf directBuffer = Unpooled.directBuffer(10);
+        if (!directBuffer.hasArray()) {
+            int length = directBuffer.readableBytes();
+            byte[] array = new byte[length];
+            ByteBuf bytes = directBuffer.getBytes(directBuffer.readerIndex(), array);
+            //0,0
+            log.info("offset:{},length:{}", bytes.readerIndex(), array.length);
+        }
     }
 }
